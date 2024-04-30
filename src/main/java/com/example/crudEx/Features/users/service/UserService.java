@@ -4,11 +4,13 @@ import com.example.crudEx.Features.users.DTO.CreateUserRequest;
 import com.example.crudEx.Features.users.DTO.UserDTO;
 import com.example.crudEx.Features.users.DTO.UserModel;
 import com.example.crudEx.Features.users.Repositories.UserRepository;
+import com.example.crudEx.Features.users.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -22,11 +24,34 @@ public class UserService {
         try {
             OffsetDateTime data = OffsetDateTime.parse(createUserRequest.getBirthDate());
             Long age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
-            UserModel userModel = new UserModel(createUserRequest.getName(), createUserRequest.getSurname(), createUserRequest.getAddress(),data, createUserRequest.getPhone(), age.intValue());
-            UserModel userModel1 =  UserModel.entityToModel(userRepository.save(UserModel.modelToEntity(userModel)));
+            UserModel userModel = new UserModel(createUserRequest.getName(), createUserRequest.getSurname(), createUserRequest.getAddress(), data, createUserRequest.getPhone(), age.intValue());
+            UserModel userModel1 = UserModel.entityToModel(userRepository.save(UserModel.modelToEntity(userModel)));
             return UserModel.modelToDto(userModel1);
+        } catch (Exception e) {
+            return null;
         }
-        catch (Exception e) {
+    }
+
+    public boolean deleteUser(long userId) {
+        Optional<UserEntity> result = userRepository.findById(userId);
+        if (result.isPresent()) {
+            try {
+                userRepository.delete(result.get());
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public UserDTO getSingleUser(long userId) {
+        Optional<UserEntity> result = userRepository.findById(userId);
+        if (result.isPresent()) {
+            UserModel userModel = UserModel.entityToModel(result.get());
+            return UserModel.modelToDto(userModel);
+        } else {
             return null;
         }
     }
