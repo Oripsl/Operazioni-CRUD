@@ -1,6 +1,7 @@
 package com.example.crudEx.Features.users.service;
 
 import com.example.crudEx.Features.users.DTO.CreateUserRequest;
+import com.example.crudEx.Features.users.DTO.UpdateUserRequest;
 import com.example.crudEx.Features.users.DTO.UserDTO;
 import com.example.crudEx.Features.users.DTO.UserModel;
 import com.example.crudEx.Features.users.Repositories.UserRepository;
@@ -51,6 +52,25 @@ public class UserService {
         if (result.isPresent()) {
             UserModel userModel = UserModel.entityToModel(result.get());
             return UserModel.modelToDto(userModel);
+        } else {
+            return null;
+        }
+    }
+
+    public UserDTO updateUser(long userId, UpdateUserRequest updateUserRequest) {
+        Optional<UserEntity> result = userRepository.findById(userId);
+
+        if (result.isPresent()) {
+            try {
+                OffsetDateTime data = OffsetDateTime.parse(updateUserRequest.getBirthDate());
+                Long age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
+                UserModel userModel = new UserModel(updateUserRequest.getName(), updateUserRequest.getSurname(), updateUserRequest.getAddress(), data, updateUserRequest.getPhone(), age.intValue());
+                UserEntity userEntityUpdate = userRepository.save(UserModel.modelToEntity(userModel));
+                UserModel savedUserModel = UserModel.entityToModel(userEntityUpdate);
+                return UserModel.modelToDto(savedUserModel);
+            } catch (Exception e) {
+                return null;
+            }
         } else {
             return null;
         }

@@ -1,6 +1,7 @@
 package com.example.crudEx.Features.users.controller;
 
 import com.example.crudEx.Features.users.DTO.CreateUserRequest;
+import com.example.crudEx.Features.users.DTO.UpdateUserRequest;
 import com.example.crudEx.Features.users.DTO.UserDTO;
 import com.example.crudEx.Features.users.entities.UserEntity;
 import com.example.crudEx.Features.users.service.UserService;
@@ -27,7 +28,7 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/delete/user/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable long userId) {
         boolean result = userService.deleteUser(userId);
         if (result) {
@@ -37,9 +38,19 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/get/{userId}")
     public ResponseEntity<?> getSingleUser(@PathVariable long userId) {
         UserDTO result = userService.getSingleUser(userId);
+        if (result == null) {
+            return ResponseEntity.status(422).body("user not found");
+        } else {
+            return ResponseEntity.ok(result);
+        }
+    }
+
+    @PatchMapping("/update/user/{userId}")
+    public ResponseEntity<?> updateSingleUser(@PathVariable long userId, @RequestBody UpdateUserRequest updateUserRequest) {
+        UserDTO result = userService.updateUser(userId, updateUserRequest);
         if (result == null) {
             return ResponseEntity.status(422).body("user not found");
         } else {
