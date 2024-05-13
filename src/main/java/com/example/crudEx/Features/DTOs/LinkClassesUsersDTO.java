@@ -1,7 +1,6 @@
 package com.example.crudEx.Features.DTOs;
 
-import com.example.crudEx.Features.classroom.entity.ClassroomEntity;
-import com.example.crudEx.Features.users.entities.UserEntity;
+import com.example.crudEx.Features.users.DTO.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,6 +9,6 @@ import lombok.Data;
 public class LinkClassesUsersDTO {
     private Long id;
 
-    private UserEntity user;
-    private ClassroomEntity classroomEntity;
+    private UserDTO user;
+    private ClassroomDTO classroom;
 }

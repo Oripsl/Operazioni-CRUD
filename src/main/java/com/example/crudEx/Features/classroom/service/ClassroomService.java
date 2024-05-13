@@ -9,8 +9,10 @@ import com.example.crudEx.Features.classroom.entity.LinkClassesUsersEntity;
 import com.example.crudEx.Features.classroom.model.ClassroomModel;
 import com.example.crudEx.Features.classroom.repository.ClassroomRepository;
 import com.example.crudEx.Features.classroom.repository.LinkClassesUsersRepository;
+import com.example.crudEx.Features.users.DTO.UserDTO;
 import com.example.crudEx.Features.users.Repositories.UserRepository;
 import com.example.crudEx.Features.users.entities.UserEntity;
+import com.example.crudEx.Features.users.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -98,13 +100,33 @@ public class ClassroomService {
            LinkClassesUsersEntity linkClassesUsersEntity = linkClassesUsersRepository.saveAndFlush(new LinkClassesUsersEntity(classroomEntity.get(), userEntity.get()));
             return new LinkClassesUsersDTO(linkClassesUsersEntity.getId(),  linkClassesUsersEntity.getUserEntities(), linkClassesUsersEntity.getClassroomEntity());
         }
-
-
-
     }
 
-    public List<UserEntity> getClassUsers(Long classId) {
-        return linkClassesUsersRepository.findUserEntitiesByClassroomEntity_Id(classId).stream().map(LinkClassesUsersEntity::getUserEntities).toList();
+    public List<UserDTO> getClassUsers(Long classId) {
+        return linkClassesUsersRepository.findUserEntitiesByClassroomEntity_Id(classId).stream()
+                .map(LinkClassesUsersEntity::getUserEntities)
+                .map(UserModel::entityToModel)
+                .map(UserModel::modelToDto)
+                .toList();
     }
+// alternativa al get con stream
+
+//    public List<UserDTO> getClassUsersII(Long classId) {
+//        List<LinkClassesUsersEntity> classesUsersEntities = linkClassesUsersRepository.findUserEntitiesByClassroomEntity_Id(classId);
+//        ArrayList<UserEntity> userEntities = new ArrayList<>();
+//        ArrayList<UserModel> userModels = new ArrayList<>();
+//        ArrayList<UserDTO> users = new ArrayList<>();
+//        for(LinkClassesUsersEntity link : classesUsersEntities){
+//            userEntities.add(link.getUserEntities());
+//        }
+//        for (UserEntity ue : userEntities){
+//            userModels.add(UserModel.entityToModel(ue));
+//        }
+//        for(UserModel um : userModels){
+//            users.add(UserModel.modelToDto(um));
+//        }
+//        return users;
+//    }
+
 
 }

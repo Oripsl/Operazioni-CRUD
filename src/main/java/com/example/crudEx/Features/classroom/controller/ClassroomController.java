@@ -5,6 +5,7 @@ import com.example.crudEx.Features.DTOs.CreateClassroomRequest;
 import com.example.crudEx.Features.DTOs.LinkClassesUsersDTO;
 import com.example.crudEx.Features.DTOs.UpdateClassroomRequest;
 import com.example.crudEx.Features.classroom.service.ClassroomService;
+import com.example.crudEx.Features.users.DTO.UserDTO;
 import com.example.crudEx.Features.users.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -78,11 +79,12 @@ public class ClassroomController {
 
     @GetMapping("/getClassUsers")
     public ResponseEntity<?> getClassUsers(@RequestParam Long classId) {
-        List<UserEntity> userEntities = classroomService.getClassUsers(classId);
-        if(userEntities.isEmpty()) {
+        List<UserDTO> users = classroomService.getClassUsers(classId);
+        if(users.isEmpty()) {
             return ResponseEntity.status(422).body(" users not found for specified class");
         } else {
-            return ResponseEntity.ok(userEntities);
+            return ResponseEntity.ok(users);
         }
     }
+
 }
