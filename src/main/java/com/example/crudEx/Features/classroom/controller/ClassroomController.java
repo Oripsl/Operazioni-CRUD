@@ -67,7 +67,7 @@ public class ClassroomController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/addUserToClass")
+    @PostMapping("/class/addUser")
     public ResponseEntity<?> addUserToClass(@RequestParam Long userId, @RequestParam Long classId) {
         LinkClassesUsersDTO result = classroomService.createLink(userId, classId);
         if (result == null) {
@@ -77,13 +77,23 @@ public class ClassroomController {
         }
     }
 
-    @GetMapping("/getClassUsers")
+    @GetMapping("/class/getUsers")
     public ResponseEntity<?> getClassUsers(@RequestParam Long classId) {
         List<UserDTO> users = classroomService.getClassUsers(classId);
         if(users.isEmpty()) {
             return ResponseEntity.status(422).body(" users not found for specified class");
         } else {
             return ResponseEntity.ok(users);
+        }
+    }
+
+    @DeleteMapping("/class/{classId}/removeUser/{userId}")
+    public ResponseEntity<?> removeUserFromClass(@PathVariable Long userId, @PathVariable Long classId){
+        boolean result = classroomService.removeUserFromClass(userId, classId);
+        if (result) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } else {
+            return ResponseEntity.status(421).body("impossible to delete the classroom");
         }
     }
 

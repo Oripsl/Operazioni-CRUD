@@ -7,6 +7,7 @@ import com.example.crudEx.Features.DTOs.UpdateClassroomRequest;
 import com.example.crudEx.Features.classroom.entity.ClassroomEntity;
 import com.example.crudEx.Features.classroom.entity.LinkClassesUsersEntity;
 import com.example.crudEx.Features.classroom.model.ClassroomModel;
+import com.example.crudEx.Features.classroom.model.LinkClassesUsersModel;
 import com.example.crudEx.Features.classroom.repository.ClassroomRepository;
 import com.example.crudEx.Features.classroom.repository.LinkClassesUsersRepository;
 import com.example.crudEx.Features.users.DTO.UserDTO;
@@ -94,11 +95,11 @@ public class ClassroomService {
         Optional<ClassroomEntity> classroomEntity = classroomRepository.findById(classId);
         Optional<UserEntity> userEntity = userRepository.findById(userId);
 
-        if(classroomEntity.isEmpty() || userEntity.isEmpty()) {
+        if (classroomEntity.isEmpty() || userEntity.isEmpty()) {
             return null;
         } else {
-           LinkClassesUsersEntity linkClassesUsersEntity = linkClassesUsersRepository.saveAndFlush(new LinkClassesUsersEntity(classroomEntity.get(), userEntity.get()));
-            return new LinkClassesUsersDTO(linkClassesUsersEntity.getId(),  linkClassesUsersEntity.getUserEntities(), linkClassesUsersEntity.getClassroomEntity());
+            LinkClassesUsersEntity linkClassesUsersEntity = linkClassesUsersRepository.saveAndFlush(new LinkClassesUsersEntity(classroomEntity.get(), userEntity.get()));
+            return LinkClassesUsersModel.modelToDto(LinkClassesUsersModel.entityToModel(linkClassesUsersEntity));
         }
     }
 
@@ -128,5 +129,19 @@ public class ClassroomService {
 //        return users;
 //    }
 
-
+    public boolean removeUserFromClass(Long userId, Long classId) {
+        LinkClassesUsersEntity result = linkClassesUsersRepository.findByUserIdAndClassId(userId, classId);
+        linkClassesUsersRepository.delete(result);
+        return true;
+//        if (result.isPresent()) {
+//            try {
+//                linkClassesUsersRepository.delete(result.get());
+//                return true;
+//            } catch (Exception e) {
+//                return false;
+//            }
+//        } else {
+//            return false;
+//        }
+    }
 }
