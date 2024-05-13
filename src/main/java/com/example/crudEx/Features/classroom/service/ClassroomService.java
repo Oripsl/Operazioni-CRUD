@@ -1,21 +1,19 @@
-package com.example.crudEx.Features.classroom;
+package com.example.crudEx.Features.classroom.service;
 
 import com.example.crudEx.Features.DTOs.ClassroomDTO;
 import com.example.crudEx.Features.DTOs.CreateClassroomRequest;
+import com.example.crudEx.Features.DTOs.LinkClassesUsersDTO;
 import com.example.crudEx.Features.DTOs.UpdateClassroomRequest;
 import com.example.crudEx.Features.classroom.entity.ClassroomEntity;
+import com.example.crudEx.Features.classroom.entity.LinkClassesUsersEntity;
 import com.example.crudEx.Features.classroom.model.ClassroomModel;
 import com.example.crudEx.Features.classroom.repository.ClassroomRepository;
-import com.example.crudEx.Features.users.DTO.UpdateUserRequest;
-import com.example.crudEx.Features.users.DTO.UserDTO;
-import com.example.crudEx.Features.users.entities.Role;
+import com.example.crudEx.Features.classroom.repository.LinkClassesUsersRepository;
+import com.example.crudEx.Features.users.Repositories.UserRepository;
 import com.example.crudEx.Features.users.entities.UserEntity;
-import com.example.crudEx.Features.users.model.UserModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +22,12 @@ import java.util.Optional;
 public class ClassroomService {
     @Autowired
     private ClassroomRepository classroomRepository;
+
+    @Autowired
+    private LinkClassesUsersRepository linkClassesUsersRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public ClassroomDTO createClassroom(CreateClassroomRequest createClassroomRequest) {
         ClassroomModel classroomModel = new ClassroomModel(createClassroomRequest.getName(), createClassroomRequest.getDescription());
@@ -82,6 +86,25 @@ public class ClassroomService {
             classroomDTOS.add(classroomDTO);
         }
         return classroomDTOS;
+    }
+
+    public LinkClassesUsersDTO createLink(Long classId, Long userId) {
+        Optional<ClassroomEntity> classroomEntity = classroomRepository.findById(classId);
+        Optional<UserEntity> userEntity = userRepository.findById(userId);
+
+        if(classroomEntity.isEmpty() || userEntity.isEmpty()) {
+            return null;
+        } else {
+           LinkClassesUsersEntity linkClassesUsersEntity = linkClassesUsersRepository.saveAndFlush(new LinkClassesUsersEntity(classroomEntity.get(), userEntity.get()));
+            return new LinkClassesUsersDTO(linkClassesUsersEntity.getId(),  linkClassesUsersEntity.getUserEntities(), linkClassesUsersEntity.getClassroomEntity());
+        }
+
+
+
+    }
+
+    public List<UserEntity> getClassUsers(Long classId) {
+        return linkClassesUsersRepository.findUserEntitiesByClassroomEntity_Id(classId).stream().map(LinkClassesUsersEntity::getUserEntities).toList();
     }
 
 }

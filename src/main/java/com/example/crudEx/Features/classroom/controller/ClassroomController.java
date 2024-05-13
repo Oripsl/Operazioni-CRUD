@@ -2,8 +2,10 @@ package com.example.crudEx.Features.classroom.controller;
 
 import com.example.crudEx.Features.DTOs.ClassroomDTO;
 import com.example.crudEx.Features.DTOs.CreateClassroomRequest;
+import com.example.crudEx.Features.DTOs.LinkClassesUsersDTO;
 import com.example.crudEx.Features.DTOs.UpdateClassroomRequest;
-import com.example.crudEx.Features.classroom.ClassroomService;
+import com.example.crudEx.Features.classroom.service.ClassroomService;
+import com.example.crudEx.Features.users.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,5 +64,25 @@ public class ClassroomController {
     public ResponseEntity<?> getAll() {
         List<ClassroomDTO> result = classroomService.getAll();
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/addUserToClass")
+    public ResponseEntity<?> addUserToClass(@RequestParam Long userId, @RequestParam Long classId) {
+        LinkClassesUsersDTO result = classroomService.createLink(userId, classId);
+        if (result == null) {
+            return ResponseEntity.status(422).body("class or user not found");
+        } else {
+            return ResponseEntity.ok(result);
+        }
+    }
+
+    @GetMapping("/getClassUsers")
+    public ResponseEntity<?> getClassUsers(@RequestParam Long classId) {
+        List<UserEntity> userEntities = classroomService.getClassUsers(classId);
+        if(userEntities.isEmpty()) {
+            return ResponseEntity.status(422).body(" users not found for specified class");
+        } else {
+            return ResponseEntity.ok(userEntities);
+        }
     }
 }
