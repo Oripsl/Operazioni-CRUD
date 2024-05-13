@@ -3,8 +3,9 @@ package com.example.crudEx.Features.users.service;
 import com.example.crudEx.Features.users.DTO.CreateUserRequest;
 import com.example.crudEx.Features.users.DTO.UpdateUserRequest;
 import com.example.crudEx.Features.users.DTO.UserDTO;
-import com.example.crudEx.Features.users.DTO.UserModel;
+import com.example.crudEx.Features.users.model.UserModel;
 import com.example.crudEx.Features.users.Repositories.UserRepository;
+import com.example.crudEx.Features.users.entities.Role;
 import com.example.crudEx.Features.users.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,7 @@ public class UserService {
         try {
             OffsetDateTime data = OffsetDateTime.parse(createUserRequest.getBirthDate());
             Long age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
-            UserModel userModel = new UserModel(createUserRequest.getName(), createUserRequest.getSurname(), createUserRequest.getAddress(), data, createUserRequest.getPhone(), age.intValue());
+            UserModel userModel = new UserModel(Role.toRole(createUserRequest.getRole()), createUserRequest.getName(), createUserRequest.getSurname(), createUserRequest.getAddress(), data, createUserRequest.getPhone(), age.intValue());
             UserModel userModel1 = UserModel.entityToModel(userRepository.save(UserModel.modelToEntity(userModel)));
             return UserModel.modelToDto(userModel1);
         } catch (Exception e) {
@@ -61,18 +62,30 @@ public class UserService {
         Optional<UserEntity> result = userRepository.findById(userId);
 
         if (result.isPresent()) {
+            long age;
+            OffsetDateTime data;
             try {
-                OffsetDateTime data = OffsetDateTime.parse(updateUserRequest.getBirthDate());
-                Long age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
-                UserModel userModel = new UserModel(updateUserRequest.getName(), updateUserRequest.getSurname(), updateUserRequest.getAddress(), data, updateUserRequest.getPhone(), age.intValue());
-                UserEntity userEntityUpdate = userRepository.save(UserModel.modelToEntity(userModel));
-                UserModel savedUserModel = UserModel.entityToModel(userEntityUpdate);
-                return UserModel.modelToDto(savedUserModel);
+                data = OffsetDateTime.parse(updateUserRequest.getBirthDate());
+                age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
             } catch (Exception e) {
-                return null;
+                data = result.get().getBirthDate();
+                age = ChronoUnit.YEARS.between(data, OffsetDateTime.now());
             }
+
+            result.get().setRole(updateUserRequest.getRole() == null ? result.get().getRole() : Role.toRole(updateUserRequest.getRole()));
+            result.get().setName(updateUserRequest.getName() == null ? result.get().getName() : updateUserRequest.getName());
+            result.get().setSurname(updateUserRequest.getSurname() == null ? result.get().getSurname() : updateUserRequest.getSurname());
+            result.get().setAddress(updateUserRequest.getAddress() == null ? result.get().getAddress() : updateUserRequest.getAddress());
+            result.get().setAge((int) age);
+            result.get().setPhone(updateUserRequest.getPhone() == null ? result.get().getPhone() : updateUserRequest.getPhone());
+            result.get().setBirthDate(data);
+            UserEntity savedUser = userRepository.saveAndFlush(result.get());
+            UserModel savedUserModel = UserModel.entityToModel(savedUser);
+            return UserModel.modelToDto(savedUserModel);
         } else {
             return null;
         }
     }
+
+
 }
